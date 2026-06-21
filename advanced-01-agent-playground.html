@@ -192,7 +192,7 @@ async function get_nasa_apod(date) {
     {title:"Saturn's Rings",date:"2024-08-03",explanation:"Saturn's magnificent ring system extends up to 282,000 km from the planet but is remarkably thin — only about 10 metres to 1 kilometre thick. The rings are composed mostly of ice particles, rocky debris, and dust...",url:"https://apod.nasa.gov/apod/image/2309/SaturnRings_Cassini_1080.jpg",media_type:"image",copyright:"NASA/JPL-Caltech"},
   ];
   try {
-    const url = `https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY${date?'&date='+date:''}`;
+    const url = `https://api.nasa.gov/planetary/apod?api_key=rUUMEEZNoU5FMSGgegHf1069N989YDNbNDkYoB3y${date?'&date='+date:''}`;
     const r = await fetch(url);
     const text = await r.text();
     const d = JSON.parse(text);
@@ -211,9 +211,18 @@ async function get_joke() {
 }
 
 async function get_quote() {
-  const r = await fetch('https://api.quotable.io/random');
-  const d = await r.json();
-  return {quote:d.content, author:d.author};
+  try {
+    const r = await fetch('https://zenquotes.io/api/random');
+    const d = await r.json();
+    return {quote:d[0].q, author:d[0].a};
+  } catch(e) {
+    const fallbacks = [
+      {quote:"The only way to do great work is to love what you do.",author:"Steve Jobs"},
+      {quote:"It does not matter how slowly you go as long as you do not stop.",author:"Confucius"},
+      {quote:"In the middle of every difficulty lies opportunity.",author:"Albert Einstein"},
+    ];
+    return fallbacks[Math.floor(Math.random()*fallbacks.length)];
+  }
 }
 
 async function get_forecast(city) {
