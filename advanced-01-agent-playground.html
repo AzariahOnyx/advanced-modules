@@ -94,6 +94,17 @@
     .divider-line{flex:1;height:0.5px;background:var(--border)}
     .divider-text{font-size:11px;color:var(--text3);white-space:nowrap;padding:0 6px}
     ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+    .obs-img{cursor:zoom-in}
+    .lightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:999;align-items:center;justify-content:center;flex-direction:column;padding:1.5rem;animation:fadeIn .2s ease;overflow-y:auto}
+    .lightbox.open{display:flex}
+    @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+    .lightbox-img{max-width:100%;max-height:75vh;object-fit:contain;border-radius:8px;box-shadow:0 0 60px rgba(0,0,0,.8)}
+    .lightbox-meta{margin-top:1rem;text-align:center;max-width:680px}
+    .lightbox-title{font-size:16px;font-weight:600;color:#fff;margin-bottom:4px}
+    .lightbox-sub{font-size:12px;color:var(--text3);margin-bottom:.75rem}
+    .lightbox-expl{font-size:13px;color:var(--text2);line-height:1.7}
+    .lightbox-close{position:fixed;top:1.25rem;right:1.5rem;background:rgba(0,0,0,.6);border:0.5px solid var(--border2);color:var(--text2);font-size:18px;width:38px;height:38px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s}
+    .lightbox-close:hover{background:var(--bg3);color:var(--text)}
     @media(max-width:600px){.layout{grid-template-columns:1fr;height:auto}.sidebar{display:none}}
   </style>
 </head>
@@ -154,6 +165,16 @@
         <button class="run-btn" id="run-btn" onclick="runAgent()">Run ▶</button>
       </div>
     </div>
+  </div>
+</div>
+
+<div class="lightbox" id="lightbox" onclick="closeLightbox(event)">
+  <button class="lightbox-close" onclick="closeLightbox()">✕</button>
+  <img class="lightbox-img" id="lb-img" src="" alt="">
+  <div class="lightbox-meta">
+    <div class="lightbox-title" id="lb-title"></div>
+    <div class="lightbox-sub" id="lb-sub"></div>
+    <div class="lightbox-expl" id="lb-expl"></div>
   </div>
 </div>
 
@@ -441,7 +462,7 @@ function addObservation(num, tool, data) {
     </div>`;
   } else if (tool === 'get_nasa_apod' && data.title) {
     body = `<div style="font-size:13px;margin-bottom:.75rem">APOD received: <strong>${data.title}</strong>${data.note?` <span style="font-size:11px;color:var(--text3)">${data.note}</span>`:''}</div>`;
-    if (data.media_type === 'image' && data.url) body += `<img class="obs-img" src="${data.url}" alt="${data.title}" onerror="this.style.display='none'">`;
+    if (data.media_type === 'image' && data.url) body += `<img class="obs-img" src="${data.url}" alt="${data.title}" onclick="openLightbox('${data.url}','${data.title.replace(/'/g,"\\'")}','${data.date} · ${(data.copyright||'Public domain').replace(/'/g,"\\'")}','${data.explanation.replace(/'/g,"\\'").replace(/\n/g,' ')}' )" onerror="this.style.display='none'"  style="cursor:zoom-in">`;
     else body += `<div style="font-size:12px;color:var(--text3);margin-top:.5rem">Video — <a href="${data.url}" target="_blank" style="color:var(--blue)">open link</a></div>`;
   } else if (tool === 'get_joke' && data.setup) {
     body = `<strong>${data.setup}</strong><br><br>${data.punchline}`;
@@ -522,6 +543,21 @@ function updateStats() {
 }
 
 function sg(btn) { document.getElementById('ginput').value = btn.textContent; }
+
+function openLightbox(url, title, sub, expl) {
+  document.getElementById('lb-img').src = url;
+  document.getElementById('lb-title').textContent = title;
+  document.getElementById('lb-sub').textContent = sub;
+  document.getElementById('lb-expl').textContent = expl;
+  document.getElementById('lightbox').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeLightbox(e) {
+  if (e && e.target !== document.getElementById('lightbox') && !e.target.classList.contains('lightbox-close')) return;
+  document.getElementById('lightbox').classList.remove('open');
+  document.body.style.overflow = '';
+}
 </script>
 </body>
 </html>
